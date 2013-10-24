@@ -6,72 +6,101 @@ module.exports = function(grunt) {
     pkg: grunt.file.readJSON('package.json'),
 
     watch: {
+
       scripts: {
-        files: ['sass/*.scss'],
+        files: ['scss/*.scss'],
         tasks: ['compass:dist'],
         options: {
           spawn: false,
         },
-      },
+      }
+
+      // publicDirectory: {
+      //   files: ["public/**/*"]
+      //   tasks
+      // }
     },
 
-    compass: {                  // Task
-      dist: {                   // Target
-        options: {              // Target options
+    //GET THE COMPASS GOING
+    compass: {
+      dist: {
+        options: {
           config: 'config.rb',
-          // sassDir: 'sass',
-          // cssDir: 'css',
           environment: 'production'
         }
       },
-      dev: {                    // Another target
+      dev: {
         options: {
-          sassDir: 'sass',
+          sassDir: 'scss',
           cssDir: 'css'
         }
       }
     },
 
-    //COPY ALL PHP FILES OVER TO DIST FOLDER
+    //COPY FILES TO DIST
     copy: {
       
-      mainfiles: {
-        src: '*.php',
-        dest: 'dist/',
-      },
-      subfiles: {
+      main: {
         files: [
-          {src: ['partials/*'], dest: 'dist/'},
-          {src: ['inc_data/*'], dest: 'dist/'},
-          {src: ['inc/**'], dest: 'dist/'}
+          {
+            expand: true,
+            cwd: 'public/',
+            src: ["**"],
+            dest: "dist/"
+          },
+          {
+            expand: true,
+            cwd: 'partials/',
+            src: ["**"],
+            dest: "dist/partials"
+          }
         ]
       },
+
       images: {
-        src: 'img/**',
-        dest: 'dist/'
+        files: [
+          {
+            expand: true,
+            cwd: 'opt-imgs/',
+            src: ["**"],
+            dest: "dist/img"
+          }
+        ]
       }
+
     },
 
+    //MAKE DAT JS UGLI!!
     uglify: {
       options: {
         banner: '/*! <%= pkg.name %> <%= grunt.template.today("yyyy-mm-dd") %> */\n'
       },
       build: {
-        src: 'src/<%= pkg.name %>.js',
-        dest: 'build/<%= pkg.name %>.min.js'
+        src: 'js/<%= pkg.name %>.js',
+        dest: 'dist/js/<%= pkg.name %>.min.js'
       }
     },
+
+    clean: {
+      all: {
+        src: 'dist/*',
+        dot: true //clean hidden files as well
+      }
+    }
 
   });
 
   // Load the plugin that provides the "uglify" task.
-  grunt.loadNpmTasks('grunt-contrib-uglify');
-  grunt.loadNpmTasks('grunt-contrib-compass');
-  grunt.loadNpmTasks('grunt-contrib-copy');
-  grunt.loadNpmTasks('grunt-contrib-watch');
+  grunt.loadNpmTasks("grunt-contrib-clean");
+  grunt.loadNpmTasks("grunt-contrib-uglify");
+  grunt.loadNpmTasks("grunt-contrib-compass");
+  grunt.loadNpmTasks("grunt-contrib-copy");
+  grunt.loadNpmTasks("grunt-contrib-watch");
 
   // Default task(s).
-  grunt.registerTask('default', ['uglify']);
+  grunt.registerTask("default", ["uglify"]);
+
+  grunt.registerTask("nuke", ["clean:all", "copy:main", "copy:images"]);
 
 };
 
